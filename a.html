@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday Ya Dody</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      background: black;
+      color: white;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    /* Password Screen */
+    #passwordScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 999;
+    }
+
+    #passwordScreen h2 {
+      color: hotpink;
+      margin-bottom: 15px;
+      font-size: 28px;
+      text-shadow: 0 0 10px hotpink;
+    }
+
+    #passwordInput {
+      padding: 12px;
+      font-size: 18px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      text-align: center;
+      width: 200px;
+    }
+
+    #passwordBtn {
+      margin-top: 15px;
+      padding: 10px 25px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      background: hotpink;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 10px hotpink;
+    }
+
+    #errorMsg {
+      margin-top: 10px;
+      color: red;
+      font-size: 14px;
+    }
+
+    /* Words Screen */
+    #wordsScreen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #singleWord {
+      font-size: 120px;
+      font-weight: bold;
+      color: hotpink;
+      opacity: 0;
+      transform: translateY(-30px);
+      transition: 0.8s;
+      text-shadow: 0 0 35px hotpink;
+      text-align: center;
+    }
+
+    .show {
+      opacity: 1 !important;
+      transform: translateY(0px) !important;
+    }
+
+    .hide {
+      opacity: 0 !important;
+      transform: translateY(30px) !important;
+    }
+
+    #nextBtn {
+      margin-top: 40px;
+      padding: 12px 30px;
+      font-size: 20px;
+      border: none;
+      border-radius: 15px;
+      background: hotpink;
+      color: white;
+      cursor: pointer;
+      display: none;
+      box-shadow: 0 0 15px hotpink;
+    }
+
+    /* Card Screen */
+    #cardScreen {
+      display: none;
+      width: 100%;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .book {
+      width: 900px;
+      max-width: 95%;
+      height: 520px;
+      max-height: 85vh;
+      position: relative;
+      perspective: 1500px;
+      cursor: pointer;
+    }
+
+    /* Inside Card */
+    .inside {
+      width: 100%;
+      height: 100%;
+      background: black;
+      border: 2px solid hotpink;
+      border-radius: 25px;
+      box-shadow: 0 0 25px hotpink;
+      display: flex;
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .leftPage {
+      width: 50%;
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 15px;
+      line-height: 1.8;
+      border-right: 2px solid hotpink;
+      color: white;
+    }
+
+    .rightPage {
+      width: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+
+    .rightPage img {
+      width: 95%;
+      height: 95%;
+      border-radius: 20px;
+      object-fit: cover;
+      border: 2px solid hotpink;
+      box-shadow: 0 0 20px hotpink;
+    }
+
+    /* Cover */
+    .cover {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      background: black;
+      border: 2px solid hotpink;
+      border-radius: 25px;
+      box-shadow: 0 0 25px hotpink;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      transition: 1s;
+      transform-origin: left;
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .coverText {
+      font-size: 90px;
+      font-weight: bold;
+      color: hotpink;
+      text-shadow: 0 0 30px hotpink;
+      text-align: center;
+      z-index: 10;
+      line-height: 1;
+    }
+
+    /* Hearts */
+    .heart {
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background: hotpink;
+      transform: rotate(45deg);
+      opacity: 0.75;
+      box-shadow: 0 0 12px hotpink;
+      animation: float 3s infinite ease-in-out;
+    }
+
+    .heart::before,
+    .heart::after {
+      content: "";
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background: hotpink;
+      border-radius: 50%;
+    }
+
+    .heart::before {
+      top: -12px;
+      left: 0;
+    }
+
+    .heart::after {
+      left: -12px;
+      top: 0;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) rotate(45deg); }
+      50% { transform: translateY(-18px) rotate(45deg); }
+      100% { transform: translateY(0) rotate(45deg); }
+    }
+
+    .cover.open {
+      transform: rotateY(-180deg);
+    }
+
+    /* Scrollbar */
+    .leftPage::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .leftPage::-webkit-scrollbar-thumb {
+      background: hotpink;
+      border-radius: 10px;
+    }
+
+    @media (max-width: 768px) {
+      #singleWord {
+        font-size: 70px;
+      }
+
+      .inside {
+        flex-direction: column;
+      }
+
+      .leftPage, .rightPage {
+        width: 100%;
+        height: 50%;
+      }
+
+      .leftPage {
+        border-right: none;
+        border-bottom: 2px solid hotpink;
+      }
+
+      .coverText {
+        font-size: 60px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <canvas id="matrix"></canvas>
+
+  <!-- Password -->
+  <div id="passwordScreen">
+    <h2>Enter Password</h2>
+    <input type="password" id="passwordInput" placeholder="Password">
+    <button id="passwordBtn">Enter</button>
+    <p id="errorMsg"></p>
+  </div>
+
+  <!-- Words -->
+  <div id="wordsScreen">
+    <div id="singleWord"></div>
+    <button id="nextBtn">Next</button>
+  </div>
+
+  <!-- Card -->
+  <div id="cardScreen">
+    <div class="book" id="book">
+
+      <div class="inside">
+        <div class="leftPage">
+          كل سنه وانت معايا يحبببى <br>
+          كل سنة وإنت منور حياتي <br>
+          ومخلي كل حاجة ليها طعم ودايمًا جنبي وبتطمنى علطول بوجودك حتى لو مش مع بعض <br><br>
+
+          بجد أنا محظوظة إنك في حياتي <br>
+          وكل سنة وأنا بحبك أكتر من أي وقت فات <br><br>
+
+          بجد أنا مش عارفة أشرح قد إيه وجودك بيفرق معايا <br>
+          معاك بحس إني على طبيعتي من غير ما أمثل ولا أخبي حاجة وبكون مرتاحه ومبسوطة معاك وبتعرف تغيرلى مودي من غير متعمل حاجه حرفيا <br><br>
+
+          وبحس إن الدنيا مهما بقت صعبه هنعديها سوا ان شاءالله <br><br>
+
+          يارب السنة الجديدة دي تكون أحلى سنة عليك <br>
+          وتحقق فيها كل اللي نفسك فيه <br>
+          وتبقى دايمًا مبسوط ومرتاح وتسيب دماغك ف حالها او ابعد عنها احسن يعنى <br><br>
+
+          وأشوفك دايمًا اشطر كتكوت <br>
+          ومهما كبرت هكون اكبر منك برضو واعرف اغلس وارخم عليك براحتى <br><br>
+
+          عامة أنا مقدرة اي حاجه انت بتعملها حتى لو بسيطة <br>
+          وصدقني أنا دايمًا معاك وهسمعك علطول وموجوده <br><br>
+
+          ده اول عيد ميلاد ليك انا معاك فيه (مش اوي بس نعديها) <br>
+          ان شاءالله نعدي سنين كتير سوا️ وافضل شيفاك علطول مبسوط وبتضحك عشان بحب ضحتك <br><br>
+
+          ربنا يخليك ليا وما يحرمنيش منك أبدًا <br>
+          يمكن المده الي قربنا فيها مكانتش كبيره او عدت بسرعة بس انت بقيت حاجة كبيرة عندي اوى <br><br>
+
+          علطول بدعيلك وان شاء الله تبقي اشطر واحلي وانحج واحد ف الدنيا <br>
+          بحبك يدومى
+        </div>
+
+        <div class="rightPage">
+          <img src="dody.jpeg" alt="Dody Photo">
+        </div>
+      </div>
+
+      <div class="cover" id="cover">
+        <div class="coverText">Love<br>U</div>
+
+        <!-- MANY HEARTS -->
+        <div class="heart" style="top: 30px; left: 40px;"></div>
+        <div class="heart" style="top: 80px; left: 150px;"></div>
+        <div class="heart" style="top: 60px; right: 80px;"></div>
+        <div class="heart" style="top: 140px; right: 200px;"></div>
+        <div class="heart" style="top: 200px; left: 60px;"></div>
+        <div class="heart" style="top: 240px; left: 200px;"></div>
+        <div class="heart" style="top: 260px; right: 90px;"></div>
+        <div class="heart" style="top: 300px; right: 250px;"></div>
+        <div class="heart" style="bottom: 60px; left: 120px;"></div>
+        <div class="heart" style="bottom: 40px; right: 140px;"></div>
+        <div class="heart" style="bottom: 120px; right: 50px;"></div>
+        <div class="heart" style="bottom: 150px; left: 300px;"></div>
+        <div class="heart" style="top: 170px; left: 350px;"></div>
+        <div class="heart" style="top: 90px; left: 350px;"></div>
+        <div class="heart" style="bottom: 90px; left: 40px;"></div>
+        <div class="heart" style="bottom: 180px; right: 320px;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const correctPassword = "762007";
+
+    document.getElementById("passwordBtn").onclick = function () {
+      const input = document.getElementById("passwordInput").value;
+
+      if (input === correctPassword) {
+        document.getElementById("passwordScreen").style.display = "none";
+        startWords();
+      } else {
+        document.getElementById("errorMsg").innerText = "Wrong Password!";
+      }
+    };
+
+    function startWords() {
+      const words = ["Happy", "Birthday", "Ya", "Dody"];
+      let index = 0;
+      const wordDiv = document.getElementById("singleWord");
+
+      function showNextWord() {
+        if (index >= words.length) {
+          document.getElementById("nextBtn").style.display = "block";
+          return;
+        }
+
+        wordDiv.innerText = words[index];
+        wordDiv.classList.add("show");
+        wordDiv.classList.remove("hide");
+
+        setTimeout(() => {
+          wordDiv.classList.add("hide");
+          wordDiv.classList.remove("show");
+        }, 1000);
+
+        index++;
+        setTimeout(showNextWord, 1500);
+      }
+
+      showNextWord();
+    }
+
+    document.getElementById("nextBtn").onclick = function () {
+      document.getElementById("wordsScreen").style.display = "none";
+      document.getElementById("cardScreen").style.display = "flex";
+    };
+
+    const book = document.getElementById("book");
+    const cover = document.getElementById("cover");
+
+    book.onclick = function () {
+      cover.classList.add("open");
+    };
+
+    // MATRIX EFFECT
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+
+    const drops = [];
+    for (let x = 0; x < columns; x++) {
+      drops[x] = 1;
+    }
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "hotpink";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 50);
+
+    window.onresize = function () {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+  </script>
+
+</body>
+</html>
